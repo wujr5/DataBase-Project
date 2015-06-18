@@ -1,0 +1,17 @@
+project需求分析:
+
+  1. json文件与论文中所介绍格式的二进制文件的相互转化
+  依赖关系：无
+  
+  2. insert filename 实现：将转化后的二进制数据存入数据库文件，插入成功则输出成功信息，插入失败则返回失败信息
+  依赖关系：json_binary_conversion.h
+  
+  3. check catalog 实现：搜索数据库，按照要求的格式返回一个相应的table表格
+  依赖关系：json_binary_conversion.h
+
+  4. find A=B实现：搜索数据库，查找满足A=B要求的文件记录，并返回json记录
+  依赖关系：json_binary_conversion.h
+  
+  5. shell界面：对命令进行分析，针对不同的命令调用不同的函数。
+
+  6. (可选)高级功能：对某些记录建立索引文件

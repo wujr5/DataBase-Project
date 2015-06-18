@@ -1,0 +1,3 @@
+namespace find {
+  void printwu();
+}

@@ -1,0 +1,30 @@
+#include<iostream>
+
+#include"insert.h"
+#include "check_catalog.h"
+#include"find.h"
+
+using namespace std;
+
+int main() {
+  // define the three functional object
+  // Insert insert;
+  // Check_catalog chcat;
+  // Find find;
+
+  cout << "*************     Welcome to Database Project shell      *******************" << endl;
+  cout << "* Commands are follows:                                                                                          *" << endl;
+  cout << "*    q                          : quit                                                                                          *" << endl;
+  cout << "*    find A=B              : find the key A is equal to B, and if exist, retuan matched  *" << endl;
+  cout << "*                                 : json records, if not, return NONE                                        *" << endl;
+  cout << "*    check catalog     : return the catalog as a kind of format of table                    *" << endl;
+  cout << "*******************************************************************" << endl << endl;
+
+  while (1) {
+    cout << "DBProject $ ";
+    string a;
+    cin >> a;
+  }
+
+  return 0;
+}
