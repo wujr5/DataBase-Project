@@ -5,7 +5,8 @@
     2) ./DBProject
 ```
 参考: 
-    makefile的语法及写法  : http://blog.csdn.net/zhoubl668/article/details/3952967
+
+makefile的语法及写法  : http://blog.csdn.net/zhoubl668/article/details/3952967
 ## 2. Debug the program
 (">" 表示在gdb环境下)
 ```
@@ -40,5 +41,7 @@
 
 ```
 参考: 
-    GDB命令使用总结（二） : http://blog.chinaunix.net/uid-20788636-id-1841301.html
-    使用gdb调试程序       : http://www.cnblogs.com/xuqiang/archive/2011/05/02/2034583.html
+
+GDB命令使用总结（二） : http://blog.chinaunix.net/uid-20788636-id-1841301.html
+
+使用gdb调试程序       : http://www.cnblogs.com/xuqiang/archive/2011/05/02/2034583.html
