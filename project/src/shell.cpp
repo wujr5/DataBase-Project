@@ -8,7 +8,7 @@
 using namespace std;
 
 void output_commands_info();
-int commands_handler(char* command, char* a);
+int commands_handler(char* command, char* arg1, char* arg2);
 
 int main() {
   // define the three functional object
@@ -28,7 +28,7 @@ int main() {
     char arg1[100];
     char arg2[100];
 
-    commands_handler(command, arg);
+    commands_handler(command, arg1, arg2);
     
     // insert.execute(com);
     // chcat.execute();
@@ -52,7 +52,7 @@ void output_commands_info() {
   cout << "****************************************************************************" << endl << endl;
 }
 
-int commands_handler(char * command, char* a) {
+int commands_handler(char * command, char* arg1, char* arg2) {
   if (string(command) == "q") {
     // cout << "Quit DBProject!" << endl;
     return 0;
@@ -81,6 +81,7 @@ int commands_handler(char * command, char* a) {
           return 5;
         } else {
           // cout << "find command!" << endl;
+          // cout << strncmp()
           return 6;
         }
       } else {
