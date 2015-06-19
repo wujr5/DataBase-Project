@@ -97,7 +97,10 @@ void output_commands_info() {
 }
 
 int commands_handler(char * command, char* arg1, char* arg2) {
-  if (string(command) == "q") {
+  if (string(command) == "") {
+    return -1;
+  }
+  else if (string(command) == "q") {
     // cout << "Quit DBProject!" << endl;
     return 0;
   }
@@ -156,7 +159,7 @@ int commands_handler(char * command, char* arg1, char* arg2) {
         // cout << "insert command!" << endl;
         strncpy(arg1, command + 7, strlen(command) - 7);
         arg1[strlen(command) - 7] = '\0';
-        
+
         // cout << arg1 << endl;
         return 9;
       } else {
