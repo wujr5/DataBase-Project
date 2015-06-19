@@ -7,7 +7,12 @@
 2. git checkout work-tree
 ```
 
-### 贡献和更新
+### 更新
+```
+1. git pull origin work-tree
+```
+
+### 贡献
 ```
 1. git add -A
 2. git commit -m 'you comment'
