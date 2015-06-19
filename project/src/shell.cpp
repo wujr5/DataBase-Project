@@ -30,9 +30,9 @@ int main() {
 
     commands_handler(command, arg1, arg2);
     
-    // insert.execute(com);
-    // chcat.execute();
-    // find.execute(com, arg);
+    insert.execute(arg1);
+    chcat.execute();
+    find.execute(arg1, arg2);
 
     // commands_handler(command);
   }
