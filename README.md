@@ -4,7 +4,8 @@
 ####
 ```
 1. git clone https://github.com/wujr5/DataBase-Project.git
-2. git checkout work-tree
+2. cd DataBase-Project
+3. git checkout work-tree
 ```
 
 ### 更新
