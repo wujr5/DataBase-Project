@@ -125,7 +125,20 @@ int commands_handler(char * command, char* arg1, char* arg2) {
           return 5;
         } else {
           // cout << "find command!" << endl;
-          // cout << strncmp()
+          int offset;
+
+          offset = strchr(command, '=') - strchr(command, ' ');
+          strncpy(arg1, command + 5, offset - 1);
+          arg1[offset - 1] = '\0';
+
+          // cout << arg1 << endl;
+
+          offset = strchr(command, '=') - command + 1;
+          strncpy(arg2, command + offset, strlen(command) - offset);
+          arg2[strlen(command) - offset] = '\0';
+
+          // cout << arg2 << endl;
+
           return 6;
         }
       } else {
@@ -141,6 +154,10 @@ int commands_handler(char * command, char* arg1, char* arg2) {
     else if (strncmp("insert ", command, 7) == 0 && strcmp("insert ", command) < 0) {
       if (strchr(command + 7, ' ') == NULL) {
         // cout << "insert command!" << endl;
+        strncpy(arg1, command + 7, strlen(command) - 7);
+        arg1[strlen(command) - 7] = '\0';
+        
+        // cout << arg1 << endl;
         return 9;
       } else {
         // cout << "extra space!" << endl;
