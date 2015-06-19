@@ -1,5 +1,5 @@
 #include "insert.h"
 
 void Insert::execute(char* filename) {
-  cout << filename << endl;
+  cout << "insert filename execute" << endl;
 }
