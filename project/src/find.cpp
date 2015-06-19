@@ -1,7 +1,6 @@
-// #include "find.h"
-// #include<iostream>
-// using namespace std;
+#include "find.h"
 
-// void find::printwu() {
-//   cout << "lalalal" << endl;
-// }
+void Find::execute(char* key, char* value) {
+  cout << key << endl;
+  cout << value << endl;
+}

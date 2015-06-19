@@ -1,4 +1,5 @@
 #include<iostream>
+#include<cstring>
 
 #include"insert.h"
 #include "check_catalog.h"
@@ -7,24 +8,31 @@
 using namespace std;
 
 void output_commands_info();
-// void commands_handler(string& command);
+int commands_handler(char* command, char* a);
 
 int main() {
   // define the three functional object
-  // Insert insert;
-  // Check_catalog chcat;
-  // Find find;
+
+  Insert insert;
+  CheckCatalog chcat;
+  Find find;
 
   output_commands_info();
-  
 
   while (1) {
     char command[100];
 
     cout << "DBProject $ ";
-    cin.getline(command, 20);
-    cout << command << endl;
-    // cout << command<< endl;
+    cin.getline(command, 100);
+    
+    char arg1[100];
+    char arg2[100];
+
+    commands_handler(command, arg);
+    
+    // insert.execute(com);
+    // chcat.execute();
+    // find.execute(com, arg);
 
     // commands_handler(command);
   }
@@ -44,11 +52,58 @@ void output_commands_info() {
   cout << "****************************************************************************" << endl << endl;
 }
 
-// void commands_handler(char * command) {
-//   if (command == "q" || command == "check catalog") {
-//     cout << command << endl;
-//     return;
-//   } else {
+int commands_handler(char * command, char* a) {
+  if (string(command) == "q") {
+    // cout << "Quit DBProject!" << endl;
+    return 0;
+  }
+  else if (string(command) == "check catalog") {
+    // cout << "check catalog command!" << endl;
+    // return 1;
+  }
+  else if (strlen(command) > 30) {
+    // cout << "your command is to long!" << endl;
+    return 2;
+  } else {
 
-//   }
-// }
+    if (strcmp("find", command) == 0 || strcmp("find ", command) == 0) {
+      // cout << "no arguments" << endl;
+      return 3;
+    }
+    else if (strncmp("find ", command, 5) == 0 && strcmp("find ", command) < 0) {
+      if (strchr(command + 5, ' ') == NULL) {
+        if (strchr(command + 5, '=') == NULL) {
+          // cout << "no = sign!" << endl;
+          return 4;
+        }
+        else if (command[strlen(command) - 1] == '=') {
+          // cout << "both side of = should have values" << endl;
+          return 5;
+        } else {
+          // cout << "find command!" << endl;
+          return 6;
+        }
+      } else {
+        // cout << "extra space!" << endl;
+        return 7;
+      }
+    }
+
+    if (strcmp("insert", command) == 0 || strcmp("insert ", command) == 0) {
+      // cout << "no arguments too" << endl;
+      return 8;
+    }
+    else if (strncmp("insert ", command, 7) == 0 && strcmp("insert ", command) < 0) {
+      if (strchr(command + 7, ' ') == NULL) {
+        // cout << "insert command!" << endl;
+        return 9;
+      } else {
+        // cout << "extra space!" << endl;
+        return 10;
+      }
+    }
+
+    // cout << "No such command!" << endl;
+    return 11;
+  }
+}
