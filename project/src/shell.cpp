@@ -123,7 +123,7 @@ int commands_handler(char * command, char* arg1, char* arg2) {
           // cout << "no = sign!" << endl;
           return 4;
         }
-        else if (command[strlen(command) - 1] == '=') {
+        else if (command[strlen(command) - 1] == '=' || command[5] == '=') {
           // cout << "both side of = should have values" << endl;
           return 5;
         } else {
