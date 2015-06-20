@@ -180,7 +180,7 @@ int commands_handler(char * command, char* arg1, char* arg2) {
 }
 
 void init_id_attribute_array() {
-  ifstream infile("./catalog.txt");
+  ifstream infile("./catalog.data");
   
   while (!infile.eof()) {
     char one_catalog[100];

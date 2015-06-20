@@ -44,7 +44,7 @@ bool Insert::J2B(char* filename) {
 char* Insert::J2B_json_obj(char* json_str) {
   preprocessing(json_str);
   // cout << json_str << endl;
-
+    return json_str;
 }
 
 void Insert::preprocessing(char* json_str) {
