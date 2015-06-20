@@ -1,20 +1,28 @@
-#include<iostream>
-#include<cstring>
+#include <iostream>
+#include <fstream>
+#include <strstream>
+#include <cstring>
 #include <stdlib.h>
 
-#include"insert.h"
+#include "insert.h"
 #include "check_catalog.h"
-#include"find.h"
+#include "find.h"
 
 using namespace std;
+
+string id_attribute[100000];
+string id_type[100000];
+int id_count[100000];
+int id_size = 0;
 
 void output_commands_info();
 int commands_handler(char* command, char* arg1, char* arg2);
 void execute_command(int command_id, char* arg1, char* arg2);
+void init_id_attribute_array();
 
 int main() {
   // define the three functional object
-
+  init_id_attribute_array();
   output_commands_info();
 
   while (1) {
@@ -93,7 +101,7 @@ void output_commands_info() {
   cout << "   check catalog   : return the catalog as a kind of format of table" << endl;
   cout << "   insert filename : insrt the file of [filename] which format is json to the " << endl;
   cout << "                   : database" << endl << endl;
-  cout << "****************************************************************************" << endl << endl;
+  cout << "*******************************************************************************" << endl << endl;
 }
 
 int commands_handler(char * command, char* arg1, char* arg2) {
@@ -123,7 +131,7 @@ int commands_handler(char * command, char* arg1, char* arg2) {
           // cout << "no = sign!" << endl;
           return 4;
         }
-        else if (command[strlen(command) - 1] == '=' || command[5] == '=') {
+        else if ((strchr(command, '=') - command) == (strlen(command)) && command[strlen(command) - 1] == '=' || command[5] == '=') {
           // cout << "both side of = should have values" << endl;
           return 5;
         } else {
@@ -159,7 +167,6 @@ int commands_handler(char * command, char* arg1, char* arg2) {
         // cout << "insert command!" << endl;
         strncpy(arg1, command + 7, strlen(command) - 7);
         arg1[strlen(command) - 7] = '\0';
-
         // cout << arg1 << endl;
         return 9;
       } else {
@@ -167,8 +174,23 @@ int commands_handler(char * command, char* arg1, char* arg2) {
         return 10;
       }
     }
-
     // cout << "No such command!" << endl;
     return 11;
+  }
+}
+
+void init_id_attribute_array() {
+  ifstream infile("./catalog.txt");
+  
+  while (!infile.eof()) {
+    char one_catalog[100];
+    infile.getline(one_catalog, 100);
+    istrstream istr(one_catalog, 100);
+
+    if (strlen(one_catalog) > 0) {
+      int tem;
+      istr >> tem >> id_attribute[id_size] >> id_type[id_size] >> id_count[id_size];
+      id_size++;
+    }
   }
 }
