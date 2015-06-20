@@ -1,2 +1,2 @@
 ./project/nobench_data.json
-
+./project/src/*.o
