@@ -21,9 +21,8 @@ void execute_command(int command_id, char* arg1, char* arg2);
 void init_id_attribute_array();
 
 int main() {
-  // define the three functional object
-  init_id_attribute_array();
   output_commands_info();
+  init_id_attribute_array();
 
   while (1) {
     char command[100];
@@ -147,9 +146,7 @@ int commands_handler(char * command, char* arg1, char* arg2) {
           offset = strchr(command, '=') - command + 1;
           strncpy(arg2, command + offset, strlen(command) - offset);
           arg2[strlen(command) - offset] = '\0';
-
           // cout << arg2 << endl;
-
           return 6;
         }
       } else {
@@ -180,7 +177,7 @@ int commands_handler(char * command, char* arg1, char* arg2) {
 }
 
 void init_id_attribute_array() {
-  ifstream infile("./catalog.txt");
+  ifstream infile("./catalog.data");
   
   while (!infile.eof()) {
     char one_catalog[100];
