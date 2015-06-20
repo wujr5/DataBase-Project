@@ -116,7 +116,7 @@ int commands_handler(char * command, char* arg1, char* arg2) {
     // cout << "check catalog command!" << endl;
     return 1;
   }
-  else if (strlen(command) > 30) {
+  else if (strlen(command) > 100) {
     // cout << "your command is to long!" << endl;
     return 2;
   } else {
