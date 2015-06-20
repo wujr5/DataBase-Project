@@ -43,7 +43,7 @@ bool Insert::J2B(char* filename) {
 
 char* Insert::J2B_json_obj(char* json_str) {
   preprocessing(json_str);
-  cout << json_str << endl;
+  // cout << json_str << endl;
 
 }
 
@@ -52,7 +52,9 @@ void Insert::preprocessing(char* json_str) {
   memset(json_str_tem,'\0',1000);
 
   for (int i = 0; i < strlen(json_str); i++) {
-    if (json_str[i] == [])
+    if (json_str[i] == '{' || json_str[i] == '\"' || json_str[i] == ':' || json_str[i] == ',' || json_str[i] == '}') {
+      cout << json_str[i];
+    }
   }
 
   json_str = json_str_tem;
