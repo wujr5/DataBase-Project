@@ -1,6 +1,2 @@
 ./project/nobench_data.json
-./src/ten.json
-./src/*.dat
-./src/insert.h
-./src/insert.cpp
-./src/test.data
+

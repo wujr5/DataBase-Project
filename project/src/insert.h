@@ -17,6 +17,7 @@ public:
   char* J2B_int(char* int_str);
   char* J2B_arr(char* arr_str);
   char* J2B_bool(char* bool_str);
+  void preprocessing(char* json_str);
   void update_catalog();
   void create_binary_data();
 

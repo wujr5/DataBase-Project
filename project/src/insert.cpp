@@ -32,8 +32,9 @@ bool Insert::J2B(char* filename) {
       cout << "This file isn't a json format file. Please insert correct file." << endl;
       return false;
     }
-
-    J2B_json_obj(json_obj);
+    else if (json_obj[0] != '[' && json_obj[0] != ']') {
+      J2B_json_obj(json_obj);
+    }
   }
 
   infile.close();
@@ -41,7 +42,20 @@ bool Insert::J2B(char* filename) {
 }
 
 char* Insert::J2B_json_obj(char* json_str) {
+  preprocessing(json_str);
   cout << json_str << endl;
+
+}
+
+void Insert::preprocessing(char* json_str) {
+  char* json_str_tem = new char[1000];
+  memset(json_str_tem,'\0',1000);
+
+  for (int i = 0; i < strlen(json_str); i++) {
+    if (json_str[i] == [])
+  }
+
+  json_str = json_str_tem;
 }
 
 void Insert::update_catalog() {
