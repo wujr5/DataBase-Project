@@ -8,12 +8,18 @@
 #include "check_catalog.h"
 #include "find.h"
 
+#define DATAPAGESIZE 8192
+#define INTBYTESIZE 4
+
 using namespace std;
 
 string id_attribute[100000];
 string id_type[100000];
 int id_count[100000];
 int id_size = 0;
+
+char buffer[DATAPAGESIZE];
+int buffer_size = 0;
 
 void output_commands_info();
 int commands_handler(char* command, char* arg1, char* arg2);

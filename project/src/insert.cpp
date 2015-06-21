@@ -1,25 +1,27 @@
 #include "insert.h"
-#include<ctype.h>
-#include<iomanip>
+
+#define DATAPAGESIZE 8192
+#define INTBYTESIZE 4
 
 extern string id_attribute[100000];
 extern string id_type[100000];
 extern int id_count[100000];
 extern int id_size;
 
+extern char buffer[DATAPAGESIZE];
+extern int buffer_size;
+
+string values[10000];
+int ids[10000];
+int size = 0;
+
 Insert::Insert() {
-  buffer_size = 0;
   row_count = 0;
 }
 
 void Insert::execute(char* filename) {
-  cout << ("nested_obj" == id_attribute[0]) << endl;
-  char tem[] = "nested_obj";
-  cout << ("nested_obj" == tem) << endl;
-  cout << (id_attribute[0] == string(tem)) << endl;
-  cout << filename << endl;
-
   if (J2B(filename))
+    write_binary_file();
     update_catalog();
 }
 
@@ -44,7 +46,11 @@ bool Insert::J2B(char* filename) {
     else if (json_obj[0] != '[' && json_obj[0] != ']') {
       J2B_json_obj(json_obj);
     }
+
+    if ((row_count - 2) > 0 && (row_count - 2) % 10 == 0) update_buffer();
   }
+
+  update_buffer();
 
   infile.close();
 
@@ -61,10 +67,6 @@ int find_arrt_id(char* key) {
 }
 
 void Insert::J2B_json_obj(char* json_str) {
-
-  string values[1000];
-  int ids[1000];
-  int size = 0;
 
   cout << json_str << endl;
 
@@ -157,73 +159,99 @@ void Insert::J2B_json_obj(char* json_str) {
 
         i += 3;
       }
-
       // cout << "value = " << values[size - 1] << endl;
     }
   }
-
-  for (int i = 0; i < size; i++) {
-    cout << i << '\t' << ids[i] <<'\t' << values[i] << endl;
-  }
 }
 
-void Insert::preprocessing(char* json_str) {
-  char* json_str_tem = new char[1000];
-  memset(json_str_tem,'\0',1000);
+// use quick sort to improve the performance
+void Insert::sort_ids_values() {
+  for (int i = 0; i < size - 1; i++) {
+    for (int j = i + 1; j < size; j++) {
+      if (ids[i] > ids[j]) {
+        int tem = ids[i];
+        ids[i] = ids[j];
+        ids[j] = tem;
 
-  for (int i = 0; i < strlen(json_str); i++) {
-    if (json_str[i] == '{' || json_str[i] == '"' || json_str[i] == ':' || json_str[i] == ',' || json_str[i] == '}') {
-      if (i == 0) {
-        json_str_tem[i] = json_str[i];
+        string tem_str = values[i];
+        values[i] = values[j];
+        values[j] = tem_str;
       }
-      else if ((json_str_tem[strlen(json_str_tem) - 1] != ' ')){
-        json_str_tem[strlen(json_str_tem)] = ' ';
-        json_str_tem[strlen(json_str_tem)] = json_str[i];
-      } else {
-        json_str_tem[strlen(json_str_tem)] = json_str[i];
-      }
-      if (json_str[i + 1] != ' ') json_str_tem[strlen(json_str_tem)] = ' ';
-    } else {
-      json_str_tem[strlen(json_str_tem)] = json_str[i];
     }
   }
-
-  cout << json_str_tem << endl << endl;
-  json_str = json_str_tem;
 }
 
 void Insert::update_catalog() {
-  ofstream outfile("./catalog.txt");
+  ofstream outfile("./catalog.data");
 
   for (int i = 0; i < id_size; i++) {
     outfile << i << " " << id_attribute[i] << " " << id_type[i] << " " << id_count[i] << endl;
   }
 
+  sort_ids_values();
+  for (int i = 0; i < size; i++) {
+    cout << i << '\t' << ids[i] <<'\t' << values[i] << endl;
+  }
+
   outfile.close();
 }
 
-void Insert::create_binary_data() {
-  ofstream outfile("./test.data", ios::binary);
-  int num = 9;
-  int aid[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-  int offset[] = {10, 20, 30, 40, 50, 60, 70, 80, 90};
+void Insert::update_buffer() {
 
-  outfile.write((char*)&num, 4);
+  if (size == 0) return;
 
-  for (int i = 0; i < 9; i++) {
-    outfile.write((char*)&aid[i], 4);
-  }
-  for (int i = 0; i < 9; i++) {
-    outfile.write((char*)&offset[i], 4);
+  if (buffer_size + INTBYTESIZE <= DATAPAGESIZE) {
+    strncpy(buffer + buffer_size, (char*)&size, INTBYTESIZE);
+    buffer_size += INTBYTESIZE;
+  } else {
+    strncpy(buffer + buffer_size, (char*)&size, DATAPAGESIZE - buffer_size);
+    write_binary_file();
+    strncpy(buffer + buffer_size, (char*)(&size + DATAPAGESIZE - buffer_size), buffer_size + INTBYTESIZE - DATAPAGESIZE);
   }
 
-  outfile.close();
+  for (int i = 0; i < size; i++) {
+    if (buffer_size + INTBYTESIZE <= DATAPAGESIZE) {
+      strncpy(buffer + buffer_size, (char*)&ids[i], INTBYTESIZE);
+      buffer_size += INTBYTESIZE;
+    } else {
+      strncpy(buffer + buffer_size, (char*)&ids[i], DATAPAGESIZE - buffer_size);
+      write_binary_file();
+      strncpy(buffer + buffer_size, (char*)(&ids[i] + DATAPAGESIZE - buffer_size), buffer_size + INTBYTESIZE - DATAPAGESIZE);
+    }
+  }
 
-  ifstream infile("./test.data", ios::binary);
+  for (int i = 0; i < size; i++) {
+    int len = values[i].size();
 
-  char tem[4];
-  infile.read(tem, 4);
-  cout << "the value of tem is :" << (int&)*tem << endl;
+    if (buffer_size + INTBYTESIZE <= DATAPAGESIZE) {
+      strncpy(buffer + buffer_size, (char*)&len, INTBYTESIZE);
+      buffer_size += INTBYTESIZE;
+    } else {
+      strncpy(buffer + buffer_size, (char*)&len, DATAPAGESIZE - buffer_size);
+      write_binary_file();
+      strncpy(buffer + buffer_size, (char*)(&len + DATAPAGESIZE - buffer_size), buffer_size + INTBYTESIZE - DATAPAGESIZE);
+    }
+
+  }
+
+  for (int i = 0; i < size; i++) {
+    if (buffer_size + INTBYTESIZE <= DATAPAGESIZE) {
+      strncpy(buffer + buffer_size, (char*)values[i].c_str(), values[i].size());
+      buffer_size += values[i].size();
+    } else {
+      strncpy(buffer + buffer_size, (char*)values[i].c_str(), DATAPAGESIZE - buffer_size);
+      write_binary_file();
+      strncpy(buffer + buffer_size, (char*)(values[i].c_str() + DATAPAGESIZE - buffer_size), buffer_size + INTBYTESIZE - DATAPAGESIZE);
+    }
+  }
+
+  size = 0;
+}
+
+void Insert::write_binary_file() {
+  ofstream outfile("./binary_data.data", ios::binary | ios::app);
+  outfile.write(buffer, buffer_size);
+  buffer_size = 0;
 }
 
   // int a = 50000;
@@ -252,18 +280,69 @@ void Insert::create_binary_data() {
   // cout << "cout lala :" << (int&)(*c) << endl;
   // cout << "cout lala :" << (int&)(*(c + 4)) << endl;
 
-  // // int cout;
+  // int cout;
 
-  // // int tem = (int&)(*c);
-  // // cout = cout + 4;
+  // int tem = (int&)(*c);
+  // cout = cout + 4;
 
-  // // if (cout > 8912) {
-  // //   read_from_file();
-  // //   cout = 0;
-  // // }
+  // if (cout > 8912) {
+  //   read_from_file();
+  //   cout = 0;
+  // }
 
-  // // char tem[4];
+  // char tem[4];
 
   
   // strcpy(c + 4, (char*)&b);
   // cout << (int&)((*(c + 4))) << endl;
+
+// void Insert::preprocessing(char* json_str) {
+//   char* json_str_tem = new char[1000];
+//   memset(json_str_tem,'\0',1000);
+
+//   for (int i = 0; i < strlen(json_str); i++) {
+//     if (json_str[i] == '{' || json_str[i] == '"' || json_str[i] == ':' || json_str[i] == ',' || json_str[i] == '}') {
+//       if (i == 0) {
+//         json_str_tem[i] = json_str[i];
+//       }
+//       else if ((json_str_tem[strlen(json_str_tem) - 1] != ' ')){
+//         json_str_tem[strlen(json_str_tem)] = ' ';
+//         json_str_tem[strlen(json_str_tem)] = json_str[i];
+//       } else {
+//         json_str_tem[strlen(json_str_tem)] = json_str[i];
+//       }
+//       if (json_str[i + 1] != ' ') json_str_tem[strlen(json_str_tem)] = ' ';
+//     } else {
+//       json_str_tem[strlen(json_str_tem)] = json_str[i];
+//     }
+//   }
+
+//   cout << json_str_tem << endl << endl;
+//   json_str = json_str_tem;
+// }
+
+// void Insert::create_binary_data() {
+//   ofstream outfile("./test.data", ios::binary);
+//   int num = 9;
+//   int aid[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+//   int offset[] = {10, 20, 30, 40, 50, 60, 70, 80, 90};
+
+//   outfile.write((char*)&num, 4);
+
+//   for (int i = 0; i < 9; i++) {
+//     outfile.write((char*)&aid[i], 4);
+//   }
+//   for (int i = 0; i < 9; i++) {
+//     outfile.write((char*)&offset[i], 4);
+//   }
+
+//   outfile.close();
+
+//   ifstream infile("./test.data", ios::binary);
+
+//   char tem[4];
+//   infile.read(tem, 4);
+//   cout << "the value of tem is :" << (int&)*tem << endl;
+// }
+
+
