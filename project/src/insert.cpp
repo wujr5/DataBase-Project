@@ -47,10 +47,10 @@ bool Insert::J2B(char* filename) {
       J2B_json_obj(json_obj);
     }
 
-    if ((row_count - 2) > 0 && (row_count - 2) % 10 == 0) update_buffer();
+    update_buffer();
   }
 
-  update_buffer();
+  
 
   infile.close();
 
@@ -68,7 +68,7 @@ int find_arrt_id(char* key) {
 
 void Insert::J2B_json_obj(char* json_str) {
 
-  cout << json_str << endl;
+  // cout << json_str << endl;
 
   for (int i = 1; i < strlen(json_str); i++) {
     if (json_str[i] == '"') {
@@ -204,9 +204,12 @@ void Insert::update_buffer() {
     strncpy(buffer + buffer_size, (char*)&size, INTBYTESIZE);
     buffer_size += INTBYTESIZE;
   } else {
-    strncpy(buffer + buffer_size, (char*)&size, DATAPAGESIZE - buffer_size);
-    write_binary_file();
-    strncpy(buffer + buffer_size, (char*)(&size + DATAPAGESIZE - buffer_size), buffer_size + INTBYTESIZE - DATAPAGESIZE);
+      int interval = DATAPAGESIZE - buffer_size;
+      strncpy(buffer + buffer_size, (char*)&size, interval);
+      buffer_size += interval;
+      write_binary_file();
+      strncpy(buffer + buffer_size, (char*)(&size + interval),INTBYTESIZE - interval);
+      buffer_size += INTBYTESIZE - interval;
   }
 
   for (int i = 0; i < size; i++) {
@@ -214,34 +217,45 @@ void Insert::update_buffer() {
       strncpy(buffer + buffer_size, (char*)&ids[i], INTBYTESIZE);
       buffer_size += INTBYTESIZE;
     } else {
-      strncpy(buffer + buffer_size, (char*)&ids[i], DATAPAGESIZE - buffer_size);
+      int interval = DATAPAGESIZE - buffer_size;
+      strncpy(buffer + buffer_size, (char*)&ids[i], interval);
+      buffer_size += interval;
       write_binary_file();
-      strncpy(buffer + buffer_size, (char*)(&ids[i] + DATAPAGESIZE - buffer_size), buffer_size + INTBYTESIZE - DATAPAGESIZE);
+      strncpy(buffer + buffer_size, (char*)(&ids[i] + interval),INTBYTESIZE - interval);
+      buffer_size += INTBYTESIZE - interval;
     }
   }
 
+  int len;
   for (int i = 0; i < size; i++) {
-    int len = values[i].size();
+    if (i == 0) len = 0;
+    else len += values[i - 1].size();
 
     if (buffer_size + INTBYTESIZE <= DATAPAGESIZE) {
       strncpy(buffer + buffer_size, (char*)&len, INTBYTESIZE);
       buffer_size += INTBYTESIZE;
     } else {
-      strncpy(buffer + buffer_size, (char*)&len, DATAPAGESIZE - buffer_size);
+      int interval = DATAPAGESIZE - buffer_size;
+      strncpy(buffer + buffer_size, (char*)&len, interval);
+      buffer_size += interval;
       write_binary_file();
-      strncpy(buffer + buffer_size, (char*)(&len + DATAPAGESIZE - buffer_size), buffer_size + INTBYTESIZE - DATAPAGESIZE);
+      strncpy(buffer + buffer_size, (char*)(&len + interval),INTBYTESIZE - interval);
+      buffer_size += INTBYTESIZE - interval;
     }
 
   }
 
   for (int i = 0; i < size; i++) {
-    if (buffer_size + INTBYTESIZE <= DATAPAGESIZE) {
+    if (buffer_size + values[i].size() <= DATAPAGESIZE) {
       strncpy(buffer + buffer_size, (char*)values[i].c_str(), values[i].size());
       buffer_size += values[i].size();
     } else {
-      strncpy(buffer + buffer_size, (char*)values[i].c_str(), DATAPAGESIZE - buffer_size);
+      int interval = DATAPAGESIZE - buffer_size;
+      strncpy(buffer + buffer_size, (char*)&values[i], interval);
+      buffer_size += interval;
       write_binary_file();
-      strncpy(buffer + buffer_size, (char*)(values[i].c_str() + DATAPAGESIZE - buffer_size), buffer_size + INTBYTESIZE - DATAPAGESIZE);
+      strncpy(buffer + buffer_size, (char*)(&values[i] + interval),values[i].size() - interval);
+      buffer_size += values[i].size() - interval;
     }
   }
 
@@ -251,98 +265,7 @@ void Insert::update_buffer() {
 void Insert::write_binary_file() {
   ofstream outfile("./binary_data.data", ios::binary | ios::app);
   outfile.write(buffer, buffer_size);
+  outfile.close();
   buffer_size = 0;
+  memset(buffer, '\0', DATAPAGESIZE);
 }
-
-  // int a = 50000;
-  // ofstream outfile("./a.dat", ios::binary);
-  // outfile.write((char*)&a, 4);
-  // outfile.close();
-
-  // int b;
-  // cout << "sizeof b is :" << sizeof(b) << endl;
-  // infile.open("./a.dat", ios::binary);
-  // infile.read((char*)&b, 4);
-  // cout << "this is b:" << b << endl;
-  // infile.close();
-
-  // outfile.open("./b.dat", ios::binary);
-
-  // a = 500;
-  // b = 1000;
-
-  // char c[8192];
-  // // infile.read(c, 8192);
-
-  // strncpy(c, (char*)&a, 4);
-  // strncpy(c + 4, (char*)&b, 4);
-
-  // cout << "cout lala :" << (int&)(*c) << endl;
-  // cout << "cout lala :" << (int&)(*(c + 4)) << endl;
-
-  // int cout;
-
-  // int tem = (int&)(*c);
-  // cout = cout + 4;
-
-  // if (cout > 8912) {
-  //   read_from_file();
-  //   cout = 0;
-  // }
-
-  // char tem[4];
-
-  
-  // strcpy(c + 4, (char*)&b);
-  // cout << (int&)((*(c + 4))) << endl;
-
-// void Insert::preprocessing(char* json_str) {
-//   char* json_str_tem = new char[1000];
-//   memset(json_str_tem,'\0',1000);
-
-//   for (int i = 0; i < strlen(json_str); i++) {
-//     if (json_str[i] == '{' || json_str[i] == '"' || json_str[i] == ':' || json_str[i] == ',' || json_str[i] == '}') {
-//       if (i == 0) {
-//         json_str_tem[i] = json_str[i];
-//       }
-//       else if ((json_str_tem[strlen(json_str_tem) - 1] != ' ')){
-//         json_str_tem[strlen(json_str_tem)] = ' ';
-//         json_str_tem[strlen(json_str_tem)] = json_str[i];
-//       } else {
-//         json_str_tem[strlen(json_str_tem)] = json_str[i];
-//       }
-//       if (json_str[i + 1] != ' ') json_str_tem[strlen(json_str_tem)] = ' ';
-//     } else {
-//       json_str_tem[strlen(json_str_tem)] = json_str[i];
-//     }
-//   }
-
-//   cout << json_str_tem << endl << endl;
-//   json_str = json_str_tem;
-// }
-
-// void Insert::create_binary_data() {
-//   ofstream outfile("./test.data", ios::binary);
-//   int num = 9;
-//   int aid[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-//   int offset[] = {10, 20, 30, 40, 50, 60, 70, 80, 90};
-
-//   outfile.write((char*)&num, 4);
-
-//   for (int i = 0; i < 9; i++) {
-//     outfile.write((char*)&aid[i], 4);
-//   }
-//   for (int i = 0; i < 9; i++) {
-//     outfile.write((char*)&offset[i], 4);
-//   }
-
-//   outfile.close();
-
-//   ifstream infile("./test.data", ios::binary);
-
-//   char tem[4];
-//   infile.read(tem, 4);
-//   cout << "the value of tem is :" << (int&)*tem << endl;
-// }
-
-

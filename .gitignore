@@ -1,2 +1,6 @@
 ./project/nobench_data.json
 ./project/src/*.o
+./project/src/*.data
+./project/src/*.json
+./project/src/DBProject
+./project/src/*.txt

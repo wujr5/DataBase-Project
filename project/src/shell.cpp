@@ -184,16 +184,18 @@ int commands_handler(char * command, char* arg1, char* arg2) {
 
 void init_id_attribute_array() {
   ifstream infile("./catalog.data");
-  
-  while (!infile.eof()) {
-    char one_catalog[100];
-    infile.getline(one_catalog, 100);
-    istrstream istr(one_catalog, 100);
+  if (infile) {
+    while (!infile.eof()) {
+      char one_catalog[100];
+      infile.getline(one_catalog, 100);
+      istrstream istr(one_catalog, 100);
 
-    if (strlen(one_catalog) > 0) {
-      int tem;
-      istr >> tem >> id_attribute[id_size] >> id_type[id_size] >> id_count[id_size];
-      id_size++;
+      if (strlen(one_catalog) > 0) {
+        int tem;
+        istr >> tem >> id_attribute[id_size] >> id_type[id_size] >> id_count[id_size];
+        id_size++;
+      }
     }
+    infile.close();
   }
 }
