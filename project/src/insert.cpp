@@ -51,8 +51,6 @@ bool Insert::J2B(char* filename) {
     update_buffer();
   }
 
-  
-
   infile.close();
 
   return true;
@@ -205,12 +203,12 @@ void Insert::update_buffer() {
     strncpy(buffer + buffer_size, (char*)&size, INTBYTESIZE);
     buffer_size += INTBYTESIZE;
   } else {
-      int interval = DATAPAGESIZE - buffer_size;
-      strncpy(buffer + buffer_size, (char*)&size, interval);
-      buffer_size += interval;
-      write_binary_file();
-      strncpy(buffer + buffer_size, (char*)(&size + interval),INTBYTESIZE - interval);
-      buffer_size += INTBYTESIZE - interval;
+    int interval = DATAPAGESIZE - buffer_size;
+    strncpy(buffer + buffer_size, (char*)&size, interval);
+    buffer_size += interval;
+    write_binary_file();
+    strncpy(buffer + buffer_size, (char*)(&size + interval),INTBYTESIZE - interval);
+    buffer_size += INTBYTESIZE - interval;
   }
 
   for (int i = 0; i < size; i++) {
@@ -228,7 +226,8 @@ void Insert::update_buffer() {
   }
 
   int len;
-  for (int i = 0; i < size; i++) {
+  for (int i = 0; i <= size; i++) {\
+    
     if (i == 0) len = 0;
     else len += values[i - 1].size();
 
