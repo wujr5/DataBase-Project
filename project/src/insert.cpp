@@ -20,10 +20,13 @@ Insert::Insert() {
 }
 
 void Insert::execute(char* filename) {
-  if (J2B(filename))
+  if (J2B(filename)) {
     write_binary_file();
     update_catalog();
     cout << "Insert file done!" << endl;
+  } else {
+    cout << "Insert file failed!" << endl;
+  }
 }
 
 bool Insert::J2B(char* filename) {
@@ -227,7 +230,7 @@ void Insert::update_buffer() {
 
   int len;
   for (int i = 0; i <= size; i++) {\
-    
+
     if (i == 0) len = 0;
     else len += values[i - 1].size();
 
