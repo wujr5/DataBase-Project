@@ -23,6 +23,7 @@ void Insert::execute(char* filename) {
   if (J2B(filename))
     write_binary_file();
     update_catalog();
+    cout << "Insert file done!" << endl;
 }
 
 bool Insert::J2B(char* filename) {
