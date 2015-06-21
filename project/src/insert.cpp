@@ -20,6 +20,7 @@ Insert::Insert() {
 }
 
 void Insert::execute(char* filename) {
+  // B2J();
   if (J2B(filename)) {
     write_binary_file();
     update_catalog();
@@ -27,6 +28,20 @@ void Insert::execute(char* filename) {
   } else {
     cout << "Insert file failed!" << endl;
   }
+}
+
+void Insert::B2J() {
+  ifstream infile("./binary_data.data", ios::binary);
+
+  int num;
+
+  char tem[1000];
+  memset(tem, '\0', 1000);
+
+  infile.read((char*)&num, 4);
+  cout << num << endl;
+
+  infile.close();
 }
 
 bool Insert::J2B(char* filename) {
@@ -190,17 +205,17 @@ void Insert::update_catalog() {
     outfile << i << " " << id_attribute[i] << " " << id_type[i] << " " << id_count[i] << endl;
   }
 
-  sort_ids_values();
-  for (int i = 0; i < size; i++) {
-    cout << i << '\t' << ids[i] <<'\t' << values[i] << endl;
-  }
-
   outfile.close();
 }
 
 void Insert::update_buffer() {
 
   if (size == 0) return;
+
+  sort_ids_values();
+  for (int i = 0; i < size; i++) {
+    cout << i << '\t' << ids[i] <<'\t' << values[i] << endl;
+  }
 
   if (buffer_size + INTBYTESIZE <= DATAPAGESIZE) {
     strncpy(buffer + buffer_size, (char*)&size, INTBYTESIZE);

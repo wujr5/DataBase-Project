@@ -18,6 +18,7 @@ public:
   void write_binary_file();
   void update_catalog();
   void create_binary_data();
+  void B2J();
 
 private:
   int row_count;
