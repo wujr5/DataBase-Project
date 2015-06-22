@@ -10,8 +10,7 @@ extern int id_size;
 
 extern char buffer[DATAPAGESIZE];
 extern int buffer_size;
-
-int select = 0;
+extern int buffer_position;
 
 string values[10000];
 unsigned int ids[10000];
@@ -22,98 +21,13 @@ Insert::Insert() {
 }
 
 void Insert::execute(char* filename) {
-  // unsigned int d = 256;
-  // cout << hex << d << endl;
-  // char tem[4];
-
-  // memcpy(tem, (char*)&d, 4);
-
-  // cout << (unsigned int &)*tem << endl;
-
-  if (select == 1) B2J();
-  else if (select == 0) {
-    if (J2B(filename)) {
-      write_binary_file();
-      update_catalog();
-      cout << "Insert file done!" << endl;
-    } else {
-      cout << "Insert file failed!" << endl;
-    }
+  if (J2B(filename)) {
+    write_binary_file();
+    update_catalog();
+    cout << "Insert file done!" << endl;
+  } else {
+    cout << "Insert file failed!" << endl;
   }
-}
-
-void Insert::B2J() {
-  ifstream infile("./binary_data.data", ios::binary);
-
-  for (int k = 0; k < 10000; k++) {
-    
-
-    int num;
-
-    char tem[1000];
-    memset(tem, '\0', 1000);
-
-    infile.read((char*)&num, 4);
-    cout << "attrbutes_num: " << num << endl;
-
-    unsigned int all_ids[1000];
-
-    for (int i = 0; i < num; i++) {
-      unsigned int id;
-      infile.read((char*)&id, 4);
-      all_ids[i] = id;
-      cout << "id: " << id << endl;
-    }
-
-    unsigned int offsets[1000];
-    offsets[0] = 0;
-
-    unsigned int last_offset = 0;
-    for (int i = 0; i <= num; i++) {
-      unsigned int offset;
-      infile.read((char*)&offset, 4);
-      if (i != 0) {
-        offsets[i - 1] = offset - last_offset;
-        cout << "offset[" << (i - 1) << "] = " << offsets[i - 1] << endl;
-      }
-
-      cout << "offset: " << offset << endl;
-      last_offset = offset;
-    }
-
-    for (int i = 0; i < num; i++) {
-      unsigned int int_tem;
-      char str_tem[1000];
-      memset(str_tem, '\0', 1000);
-
-      if (id_type[all_ids[i]] == "text") {
-        infile.read(str_tem, offsets[i]);
-        cout << id_attribute[all_ids[i]] << " = " << str_tem << endl;
-      }
-      else if (id_type[all_ids[i]] == "json_obj") {
-        infile.read(str_tem, offsets[i]);
-        cout << id_attribute[all_ids[i]] << " = " << "{" << str_tem << "}" << endl;
-      }
-      else if (id_type[all_ids[i]] == "arr") {
-        infile.read(str_tem, offsets[i]);
-        cout << id_attribute[all_ids[i]] << " = [" << str_tem << "]" << endl;
-      }
-      else if (id_type[all_ids[i]] == "int") {
-        infile.read((char*)&int_tem, 4);
-        cout << id_attribute[all_ids[i]] << " = " << int_tem << endl;
-      }
-      else if (id_type[all_ids[i]] == "bool") {
-        infile.read(str_tem, 1);
-        if (str_tem[0] == '0')
-          cout << id_attribute[all_ids[i]] << " = " << "false" << endl;
-        else 
-          cout << id_attribute[all_ids[i]] << " = " << "true" << endl;
-      }
-    }
-    cout << "k = " << k << endl;
-  }
-
-  infile.close();
 }
 
 bool Insert::J2B(char* filename) {
@@ -129,8 +43,6 @@ bool Insert::J2B(char* filename) {
     infile.getline(json_obj, 1000);
 
     row_count++;
-    // cout << "row_count = " << row_count << endl;
-    // if (row_count == 33) break;
 
     if (row_count == 1 && json_obj[0] != '[' || row_count == 2 && json_obj[0] != '{') {
       cout << "This file isn't a json format file. Please insert correct file." << endl;
@@ -139,12 +51,9 @@ bool Insert::J2B(char* filename) {
     else if (json_obj[0] != '[' && json_obj[0] != ']') {
       J2B_json_obj(json_obj);
     }
-
     update_buffer();
   }
-
   infile.close();
-
   return true;
 }
 
@@ -158,9 +67,6 @@ int find_arrt_id(char* key, string type) {
 }
 
 void Insert::J2B_json_obj(char* json_str) {
-
-  // cout << json_str << endl;
-
   for (int i = 1; i < strlen(json_str); i++) {
     if (json_str[i] == '"') {
 
@@ -173,8 +79,6 @@ void Insert::J2B_json_obj(char* json_str) {
 
       if (i + interval_1 < strlen(json_str)) {
         memcpy(key_tem, json_str + i + 1, interval_1);
-
-        // cout << "key = " << key_tem << " ";
 
         i += interval_1 + 4;
 
@@ -237,7 +141,6 @@ void Insert::J2B_json_obj(char* json_str) {
           char tem[100];
           memset(tem, '\0', 100);
           memcpy(tem, json_str + i, interval_2);
-          // cout << tem << endl;
           values[size++] = string(tem);
 
           i += 2;
@@ -266,11 +169,8 @@ void Insert::J2B_json_obj(char* json_str) {
           i += 3;
         }
       }
-      // cout << "value = " << values[size - 1] << endl;
     }
   }
-
-  // int k = 0;
 }
 
 // use quick sort to improve the performance
@@ -305,10 +205,6 @@ void Insert::update_buffer() {
   if (size == 0) return;
 
   sort_ids_values();
-
-  // for (int i = 0; i < size; i++) {
-  //   cout << i << "\t" << ids[i] << "\t" << id_attribute[ids[i]] << "\t" << values[i] << "\t" << id_type[ids[i]] << endl;
-  // }
 
   // store attrbutes_num
   if (buffer_size == DATAPAGESIZE) {
@@ -355,9 +251,6 @@ void Insert::update_buffer() {
 
   // store offset
   unsigned int len = 0;
-  // for (int i = 0; i < size; i++) {
-  //   cout << i << "\t" << ids[i] << "\t" << id_attribute[ids[i]] << "\t" << values[i] << "\t" << id_type[ids[i]] << endl;
-  // }
 
   for (int i = 0; i <= size; i++) {
 

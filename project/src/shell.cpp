@@ -20,6 +20,7 @@ int id_size = 0;
 
 char buffer[DATAPAGESIZE];
 int buffer_size = 0;
+int buffer_position = 0;
 
 void output_commands_info();
 int commands_handler(char* command, char* arg1, char* arg2);
