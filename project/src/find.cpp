@@ -15,9 +15,11 @@ extern int id_size;
 bool isNone = true;
 
 
+
 void Find::execute(char* key, char* value) {
     
     isNone = true;
+  
     
     cout << "find command execute!" << endl;
     cout << "key = " << key << endl;
@@ -25,10 +27,11 @@ void Find::execute(char* key, char* value) {
     
     cout << "-------RESULT AS FOLLOWING-------"<<endl;
     
-    int key_id = get_key_id(key);
+    int key_id = get_key_id(key,value);
+    
     //cout <<key_id<<endl;
     if(key_id == -1){             //cannot find the key
-        cout<<"None"<<endl;
+        cout<<"NONE"<<endl;
         return;
     }
     
@@ -36,19 +39,25 @@ void Find::execute(char* key, char* value) {
     char c[DATAPAGESIZE];
     
     
-    infile.read(c, DATAPAGESIZE);
+    
     int position = 0;
-    int attribute_num=-1;
+    int attribute_num = -1;
+    int c_size = 0;
+    
+    infile.read(c, DATAPAGESIZE);
+    c_size = infile.gcount();
     
     char temp[4];
     //used for save the number when the space at end of page is not reached 8KB.
     
-    while(!infile.eof()){
+    while(!infile.eof() && position < c_size){
+        
         //get the number of attributes
         if (position + 4 >= DATAPAGESIZE) {
             strncpy(temp, c + position, DATAPAGESIZE - position);
             infile.read(c, DATAPAGESIZE);
-            strncpy(temp + DATAPAGESIZE - position, c , position + 4 - 8192);
+            c_size = infile.gcount();
+            strncpy(temp + DATAPAGESIZE - position, c , position + 4 - DATAPAGESIZE);
             attribute_num = (int&)(*temp);
             position = (position + 4) % DATAPAGESIZE;
         }
@@ -72,6 +81,7 @@ void Find::execute(char* key, char* value) {
             if (position + 4 >= DATAPAGESIZE) {
                 strncpy(temp, c + position, DATAPAGESIZE - position);
                 infile.read(c, DATAPAGESIZE);
+                c_size = infile.gcount();
                 strncpy(temp + DATAPAGESIZE - position, c , position + 4 - DATAPAGESIZE);
                 aid[i] = (int&)(*temp);
                 position = (position + 4) % DATAPAGESIZE;
@@ -86,6 +96,7 @@ void Find::execute(char* key, char* value) {
                 key_position = i;
             }
             
+            
         }
 
 //        for (int i=0; i<attribute_num; i++) {
@@ -99,6 +110,7 @@ void Find::execute(char* key, char* value) {
             if (position + 4 >= DATAPAGESIZE) {
                 strncpy(temp, c + position, DATAPAGESIZE - position);
                 infile.read(c, DATAPAGESIZE);
+                c_size = infile.gcount();
                 strncpy(temp + DATAPAGESIZE - position, c , position + 4 - 8192);
                 offset[i] = (int&)(*temp);
                 position = (position + 4) % DATAPAGESIZE;
@@ -113,11 +125,15 @@ void Find::execute(char* key, char* value) {
         if (!exist_key){
             if (position + offset[attribute_num] >= DATAPAGESIZE) {
                 infile.read(c, DATAPAGESIZE);
+                c_size = infile.gcount();
                 position = (position + offset[attribute_num]) % DATAPAGESIZE;
             }
             else{
                 position += offset[attribute_num];
             }
+            
+            memset(aid, 0, sizeof(aid));
+            memset(offset, 0, sizeof(offset));
             continue;
         }
         
@@ -138,6 +154,7 @@ void Find::execute(char* key, char* value) {
             data[i] = *(c + position);
             if (position + 1 >= DATAPAGESIZE) {
                 infile.read(c, DATAPAGESIZE);
+                c_size = infile.gcount();
                 position = (position + 1) % DATAPAGESIZE;
             }
             else{
@@ -171,6 +188,26 @@ void Find::execute(char* key, char* value) {
             memset(result, 0, sizeof(result));
             sprintf(result,"%d",num);
             
+        }
+        
+        if (id_type[key_id] == "json_obj") {
+            char tem[200];
+            memset(tem, 0, sizeof(tem));
+            tem[0] = '{';
+            strncpy(tem+1, result, strlen(result));
+            tem[strlen(result) + 1] = '}';
+            memset(result, 0, sizeof(result));
+            strncpy(result, tem, strlen(tem));
+        }
+        
+        if (id_type[key_id] == "arr") {
+            char tem[200];
+            memset(tem, 0, sizeof(tem));
+            tem[0] = '[';
+            strncpy(tem+1, result, strlen(result));
+            tem[strlen(result) + 1] = ']';
+            memset(result, 0, sizeof(result));
+            strncpy(result, tem, strlen(tem));
         }
 
         if (strcmp(value, result) == 0) {
@@ -211,9 +248,10 @@ void Find::execute(char* key, char* value) {
                 }
                 else if (id_type[aid[i]] == "text"){
                     cout<<"\"";
-                    char output[200];
+                    char output[1000];
                     memset(output, 0, sizeof(output));
                     strncpy(output, data + offset[i], offset[i+1]-offset[i]);
+                    //memcpy(output, data + offset[i], offset[i+1]-offset[i]);
                     cout<<output;
                     cout<<"\"";
                 }
@@ -239,12 +277,40 @@ void Find::execute(char* key, char* value) {
 }
 
 // test case : find str2=GBRDCMBQGAYTCMBQGEYTAMJR
+//             find nested_obj={"num": 4507, "str": "GBRDCMBQGAYTCMBQGEYTAMJR"}
+//             find nested_arr=["checking", "of", "acquired"]
+//             find nested_arr=["a", "an"]
+//             find nested_obj={"num": 6924, "str": "GBRDCMJQGEYTAMBQGAYTCMBQ"}
 
-int Find::get_key_id(char* key){
+
+int Find::get_key_id(char* key,char* value){
+    
+    string key_type;
+    //memset(key_type, 0, sizeof(key_type));
+    if (value[0] == '{') {
+        //memcpy(key_type, "json_obj", 8);
+        key_type = "json_obj";
+    }
+    else if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0){
+        //memcpy(key_type, "bool", 4);
+        key_type = "bool";
+    }
+    else if (value[0]>='0' && value[0]<='9'){
+        //memcpy(key_type, "int", 3);
+        key_type = "int";
+    }
+    else if (value[0] == '['){
+       // memcpy(key_type, "arr", 3);
+        key_type = "arr";
+    }
+    else {
+       // memcpy(key_type, "text", 4);
+        key_type = "text";
+    }
+    
     int key_id = -1;
-    //string _key = key;
     for (int i = 0; i < id_size ; i++) {
-        if (id_attribute[i] == key) {
+        if (id_attribute[i] == key && id_type[i].c_str() == key_type) {
             key_id = i;
             break;
         }

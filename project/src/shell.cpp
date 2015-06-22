@@ -102,10 +102,10 @@ void output_commands_info() {
   cout << "****************     Welcome to Database Project shell      *******************" << endl << endl;
   cout << "Commands are as follows:" << endl << endl;
   cout << "   q               : quit" << endl;
-  cout << "   find A=B        : find the key A is equal to B, and if exist, retuan matched" << endl;
+  cout << "   find A=B        : find the key A is equal to B, and if exist, return matched" << endl;
   cout << "                     json records, if not, return NONE" << endl;
   cout << "   check catalog   : return the catalog as a kind of format of table" << endl;
-  cout << "   insert filename : insrt the file of [filename] which format is json to the " << endl;
+  cout << "   insert filename : insert the file of [filename] which format is json to the " << endl;
   cout << "                   : database" << endl << endl;
   cout << "*******************************************************************************" << endl << endl;
 }
