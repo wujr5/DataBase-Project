@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <iomanip>
 #include <strstream>
+#include <time.h>
 
 using namespace std;
 

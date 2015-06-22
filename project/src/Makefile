@@ -2,7 +2,7 @@ DBProject: find.o insert.o check_catalog.o shell.o
 	cc -o DBProject find.o insert.o check_catalog.o shell.o -lstdc++ -g
 
 find.o: find.cpp find.h
-	cc -c find.cpp -lstdc++ -g
+	cc -c find.cpp -lstdc++ -g -Wno-deprecated
 
 insert.o: insert.cpp insert.h
 	cc -c insert.cpp -lstdc++ -g -Wno-deprecated

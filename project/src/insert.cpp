@@ -21,12 +21,17 @@ Insert::Insert() {
 }
 
 void Insert::execute(char* filename) {
+  clock_t start_time = clock();
+
   if (J2B(filename)) {
     write_binary_file();
     update_catalog();
+
     cout << "Insert file done!" << endl;
+    clock_t end_time = clock();
+    cout << "Running time is: " << static_cast<double>(end_time-start_time) / CLOCKS_PER_SEC*1000 << "ms" << endl;
   } else {
-    cout << "Insert file failed!" << endl;
+    cout << "Insert file failed!" << endl << endl;
   }
 }
 
