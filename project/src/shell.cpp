@@ -132,7 +132,7 @@ int commands_handler(char * command, char* arg1, char* arg2) {
       return 3;
     }
     else if (strncmp("find ", command, 5) == 0 && strcmp("find ", command) < 0) {
-      if (strchr(command + 5, ' ') == NULL) {
+      // if (strchr(command + 5, ' ') == NULL) {
         if (strchr(command + 5, '=') == NULL) {
           // cout << "no = sign!" << endl;
           return 4;
@@ -156,10 +156,11 @@ int commands_handler(char * command, char* arg1, char* arg2) {
           // cout << arg2 << endl;
           return 6;
         }
-      } else {
-        // cout << "extra space!" << endl;
-        return 7;
-      }
+      // }
+      //  else {
+      //   // cout << "extra space!" << endl;
+      //   return 7;
+      // }
     }
 
     if (strcmp("insert", command) == 0 || strcmp("insert ", command) == 0) {
