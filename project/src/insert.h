@@ -3,6 +3,7 @@
 #include <cstring>
 #include <ctype.h>
 #include <iomanip>
+#include <strstream>
 
 using namespace std;
 
